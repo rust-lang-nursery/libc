@@ -265,6 +265,13 @@ s_no_extra_traits! {
     )]
     pub struct epoll_event {
         pub events: u32,
+        pub data: epoll_data,
+    }
+
+    pub union epoll_data {
+        pub ptr: *mut c_void,
+        pub fd: c_int,
+        pub u32: u32,
         pub u64: u64,
     }
 
@@ -314,26 +321,28 @@ cfg_if! {
     if #[cfg(feature = "extra_traits")] {
         impl PartialEq for epoll_event {
             fn eq(&self, other: &epoll_event) -> bool {
-                self.events == other.events && self.u64 == other.u64
+                unimplemented!("traits")
             }
         }
         impl Eq for epoll_event {}
-        impl fmt::Debug for epoll_event {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                let events = self.events;
-                let u64 = self.u64;
-                f.debug_struct("epoll_event")
-                    .field("events", &events)
-                    .field("u64", &u64)
-                    .finish()
-            }
-        }
         impl hash::Hash for epoll_event {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 let events = self.events;
-                let u64 = self.u64;
+                let data = self.data;
                 events.hash(state);
-                u64.hash(state);
+                data.hash(state);
+            }
+        }
+
+        impl PartialEq for epoll_data {
+            fn eq(&self, other: &epoll_data) -> bool {
+                unimplemented!("traits")
+            }
+        }
+        impl Eq for epoll_data {}
+        impl hash::Hash for epoll_data {
+            fn hash<H: hash::Hasher>(&self, state: &mut H) {
+                unimplemented!("traits")
             }
         }
 
