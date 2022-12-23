@@ -3564,11 +3564,11 @@ pub const AF_E164: ::c_int = AF_ISDN;
 pub const pseudo_AF_KEY: ::c_int = 29;
 pub const AF_INET6: ::c_int = 30;
 pub const AF_NATM: ::c_int = 31;
-pub const AF_SYSTEM: ::c_int = 32;
+pub const AF_SYSTEM: ::c_uchar = 32;
 pub const AF_NETBIOS: ::c_int = 33;
 pub const AF_PPP: ::c_int = 34;
 pub const pseudo_AF_HDRCMPLT: ::c_int = 35;
-pub const AF_SYS_CONTROL: ::c_int = 2;
+pub const AF_SYS_CONTROL: ::c_ushort = 2;
 
 pub const SYSPROTO_EVENT: ::c_int = 1;
 pub const SYSPROTO_CONTROL: ::c_int = 2;
