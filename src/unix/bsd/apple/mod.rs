@@ -3606,7 +3606,7 @@ pub const PF_ISDN: ::c_int = AF_ISDN;
 pub const PF_KEY: ::c_int = pseudo_AF_KEY;
 pub const PF_INET6: ::c_int = AF_INET6;
 pub const PF_NATM: ::c_int = AF_NATM;
-pub const PF_SYSTEM: ::c_uchar = AF_SYSTEM;
+pub const PF_SYSTEM: ::c_int = 32;
 pub const PF_NETBIOS: ::c_int = AF_NETBIOS;
 pub const PF_PPP: ::c_int = AF_PPP;
 
