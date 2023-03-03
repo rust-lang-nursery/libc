@@ -1,16 +1,7 @@
 pub type pthread_t = *mut ::c_void;
 pub type clock_t = c_long;
-#[cfg_attr(
-    not(feature = "rustc-dep-of-std"),
-    deprecated(
-        since = "0.2.80",
-        note = "This type is changed to 64-bit in musl 1.2.0, \
-                we'll follow that change in the future release. \
-                See #1848 for more info."
-    )
-)]
-pub type time_t = c_long;
-pub type suseconds_t = c_long;
+pub type time_t = i64;
+pub type suseconds_t = i64;
 pub type ino_t = u64;
 pub type off_t = i64;
 pub type blkcnt_t = i64;
@@ -285,14 +276,9 @@ s_no_extra_traits! {
         pub __reserved: [::c_char; 256],
     }
 
-    // FIXME: musl added paddings and adjusted
-    // layout in 1.2.0 but our CI is still 1.1.24.
-    // So, I'm leaving some fields as comments for now.
-    // ref. https://github.com/bminor/musl/commit/
-    // 1e7f0fcd7ff2096904fd93a2ee6d12a2392be392
     pub struct utmpx {
         pub ut_type: ::c_short,
-        //__ut_pad1: ::c_short,
+        __ut_pad1: ::c_short,
         pub ut_pid: ::pid_t,
         pub ut_line: [::c_char; 32],
         pub ut_id: [::c_char; 4],
@@ -300,15 +286,15 @@ s_no_extra_traits! {
         pub ut_host: [::c_char; 256],
         pub ut_exit: __exit_status,
 
-        //#[cfg(target_endian = "little")]
-        pub ut_session: ::c_long,
-        //#[cfg(target_endian = "little")]
-        //__ut_pad2: ::c_long,
+        #[cfg(target_endian = "little")]
+        pub ut_session: ::c_int,
+        #[cfg(target_endian = "little")]
+        __ut_pad2: ::c_int,
 
-        //#[cfg(not(target_endian = "little"))]
-        //__ut_pad2: ::c_int,
-        //#[cfg(not(target_endian = "little"))]
-        //pub ut_session: ::c_int,
+        #[cfg(not(target_endian = "little"))]
+        __ut_pad2: ::c_int,
+        #[cfg(not(target_endian = "little"))]
+        pub ut_session: ::c_int,
 
         pub ut_tv: ::timeval,
         pub ut_addr_v6: [::c_uint; 4],
@@ -702,6 +688,7 @@ extern "C" {
         vlen: ::c_uint,
         flags: ::c_uint,
     ) -> ::c_int;
+    #[cfg_attr(musl_time64_abi, link_name = "__recvmmsg_time64")]
     pub fn recvmmsg(
         sockfd: ::c_int,
         msgvec: *mut ::mmsghdr,
@@ -728,6 +715,7 @@ extern "C" {
     ) -> ::c_int;
 
     pub fn ioctl(fd: ::c_int, request: ::c_int, ...) -> ::c_int;
+    #[cfg_attr(musl_time64_abi, link_name = "__gettimeofday_time64")]
     pub fn gettimeofday(tp: *mut ::timeval, tz: *mut ::c_void) -> ::c_int;
     pub fn ptrace(request: ::c_int, ...) -> ::c_long;
     pub fn getpriority(which: ::c_int, who: ::id_t) -> ::c_int;
@@ -749,7 +737,9 @@ extern "C" {
     // Added in `musl` 1.2.2
     pub fn reallocarray(ptr: *mut ::c_void, nmemb: ::size_t, size: ::size_t) -> *mut ::c_void;
 
+    #[cfg_attr(musl_time64_abi, link_name = "__adjtimex_time64")]
     pub fn adjtimex(buf: *mut ::timex) -> ::c_int;
+    #[cfg_attr(musl_time64_abi, link_name = "__clock_adjtime64")]
     pub fn clock_adjtime(clk_id: ::clockid_t, buf: *mut ::timex) -> ::c_int;
 
     pub fn ctermid(s: *mut ::c_char) -> *mut ::c_char;

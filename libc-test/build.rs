@@ -3118,6 +3118,23 @@ fn test_linux(target: &str) {
     // deprecated since glibc >= 2.29. This allows Rust binaries to link against
     // glibc versions older than 2.29.
     cfg.define("__GLIBC_USE_DEPRECATED_SCANF", None);
+    // Some targets use time64 symbols so set the musl_time64_abi appropriately.
+    // See #2088 and #1848 for more information.
+    match target {
+        "arm-unknown-linux-musleabi"
+        | "arm-unknown-linux-musleabihf"
+        | "armv5te-unknown-linux-musleabi"
+        | "armv7-unknown-linux-musleabi"
+        | "armv7-unknown-linux-musleabihf"
+        | "i586-unknown-linux-musl"
+        | "i686-unknown-linux-musl"
+        | "mips-unknown-linux-musl"
+        | "mipsel-unknown-linux-musl"
+        | "powerpc-unknown-linux-musl" => {
+            cfg.cfg("musl_time64_abi", None);
+        }
+        _ => {}
+    }
 
     headers! { cfg:
                "ctype.h",
@@ -3311,8 +3328,8 @@ fn test_linux(target: &str) {
 
             t if t.ends_with("_t") => t.to_string(),
 
-            // In MUSL `flock64` is a typedef to `flock`.
-            "flock64" if musl => format!("struct {}", ty),
+            // In MUSL, `flock64` is a typedef to `flock` and `stat64` is a typedef to `stat`.
+            "flock64" | "stat64" if musl => format!("struct {}", ty),
 
             // put `struct` in front of all structs:.
             t if is_struct => format!("struct {}", t),
@@ -3538,6 +3555,9 @@ fn test_linux(target: &str) {
             // FIXME: on musl the pthread types are defined a little differently
             // - these constants are used by the glibc implementation.
             n if musl && n.contains("__SIZEOF_PTHREAD") => true,
+
+            // FIXME: ctest reports incorrect values for both Rust/libc and C/musl.
+            "IPC_STAT" if musl => true,
 
             // FIXME: It was extended to 4096 since glibc 2.31 (Linux 5.4).
             // We should do so after a while.
