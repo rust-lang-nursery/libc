@@ -8,8 +8,6 @@ use std::string::String;
 // make sure to add it to this list as well.
 const ALLOWED_CFGS: &'static [&'static str] = &[
     "emscripten_new_stat_abi",
-    "freebsd10",
-    "freebsd11",
     "freebsd12",
     "freebsd13",
     "freebsd14",
@@ -56,18 +54,13 @@ fn main() {
         );
     }
 
-    // The ABI of libc used by libstd is backward compatible with FreeBSD 10.
-    // The ABI of libc from crates.io is backward compatible with FreeBSD 11.
-    //
     // On CI, we detect the actual FreeBSD version and match its ABI exactly,
     // running tests to ensure that the ABI is correct.
     match which_freebsd() {
-        Some(10) if libc_ci || rustc_dep_of_std => set_cfg("freebsd10"),
-        Some(11) if libc_ci => set_cfg("freebsd11"),
         Some(12) if libc_ci => set_cfg("freebsd12"),
         Some(13) if libc_ci => set_cfg("freebsd13"),
         Some(14) if libc_ci => set_cfg("freebsd14"),
-        Some(_) | None => set_cfg("freebsd11"),
+        Some(_) | None => set_cfg("freebsd12"),
     }
 
     match emcc_version_code() {

@@ -48,6 +48,11 @@ pub type cpusetid_t = ::c_int;
 
 pub type sctp_assoc_t = u32;
 
+pub type nlink_t = u64;
+pub type dev_t = u64;
+pub type ino_t = ::c_ulong;
+pub type shmatt_t = ::c_uint;
+
 #[cfg_attr(feature = "extra_traits", derive(Debug, Hash, PartialEq, Eq))]
 #[repr(u32)]
 pub enum devstat_support_flags {
@@ -429,8 +434,6 @@ s! {
         pub kve_vn_fileid: u64,
         #[cfg(not(freebsd11))]
         pub kve_vn_fsid_freebsd11: u32,
-        #[cfg(freebsd11)]
-        pub kve_vn_fsid: u32,
         pub kve_flags: ::c_int,
         pub kve_resident: ::c_int,
         pub kve_private_resident: ::c_int,
@@ -441,8 +444,6 @@ s! {
         pub kve_vn_size: u64,
         #[cfg(not(freebsd11))]
         pub kve_vn_rdev_freebsd11: u32,
-        #[cfg(freebsd11)]
-        pub kve_vn_rdev: u32,
         pub kve_vn_mode: u16,
         pub kve_status: u16,
         #[cfg(not(freebsd11))]
@@ -451,8 +452,6 @@ s! {
         pub kve_vn_rdev: u64,
         #[cfg(not(freebsd11))]
         _kve_is_spare: [::c_int; 8],
-        #[cfg(freebsd11)]
-        _kve_is_spare: [::c_int; 12],
         pub kve_path: [[::c_char; 32]; 32],
     }
 
@@ -1319,6 +1318,28 @@ s! {
         pub strchange_instrms: u16,
         pub strchange_outstrms: u16,
     }
+
+    pub struct kevent {
+        pub ident: ::uintptr_t,
+        pub filter: ::c_short,
+        pub flags: ::c_ushort,
+        pub fflags: ::c_uint,
+        pub data: i64,
+        pub udata: *mut ::c_void,
+        pub ext: [u64; 4],
+    }
+
+    pub struct shmid_ds {
+        pub shm_perm: ::ipc_perm,
+        pub shm_segsz: ::size_t,
+        pub shm_lpid: ::pid_t,
+        pub shm_cpid: ::pid_t,
+        pub shm_nattch: ::shmatt_t,
+        pub shm_atime: ::time_t,
+        pub shm_dtime: ::time_t,
+        pub shm_ctime: ::time_t,
+    }
+
 }
 
 s_no_extra_traits! {
@@ -1610,6 +1631,42 @@ s_no_extra_traits! {
     pub struct sctp_error_auth_invalid_hmac {
         pub cause: sctp_error_cause,
         pub hmac_id: u16,
+    }
+
+    pub struct dirent {
+        pub d_fileno: ::ino_t,
+        pub d_off: ::off_t,
+        pub d_reclen: u16,
+        pub d_type: u8,
+        d_pad0: u8,
+        pub d_namlen: u16,
+        d_pad1: u16,
+        pub d_name: [::c_char; 256],
+    }
+
+    pub struct statfs {
+        pub f_version: u32,
+        pub f_type: u32,
+        pub f_flags: u64,
+        pub f_bsize: u64,
+        pub f_iosize: u64,
+        pub f_blocks: u64,
+        pub f_bfree: u64,
+        pub f_bavail: i64,
+        pub f_files: u64,
+        pub f_ffree: i64,
+        pub f_syncwrites: u64,
+        pub f_asyncwrites: u64,
+        pub f_syncreads: u64,
+        pub f_asyncreads: u64,
+        f_spare: [u64; 10],
+        pub f_namemax: u32,
+        pub f_owner: ::uid_t,
+        pub f_fsid: ::fsid_t,
+        f_charspare: [::c_char; 80],
+        pub f_fstypename: [::c_char; 16],
+        pub f_mntfromname: [::c_char; 1024],
+        pub f_mntonname: [::c_char; 1024],
     }
 }
 
@@ -2565,6 +2622,121 @@ cfg_if! {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 {self.cause}.hash(state);
                 {self.hmac_id}.hash(state);
+            }
+        }
+        impl PartialEq for statfs {
+            fn eq(&self, other: &statfs) -> bool {
+                self.f_version == other.f_version
+                    && self.f_type == other.f_type
+                    && self.f_flags == other.f_flags
+                    && self.f_bsize == other.f_bsize
+                    && self.f_iosize == other.f_iosize
+                    && self.f_blocks == other.f_blocks
+                    && self.f_bfree == other.f_bfree
+                    && self.f_bavail == other.f_bavail
+                    && self.f_files == other.f_files
+                    && self.f_ffree == other.f_ffree
+                    && self.f_syncwrites == other.f_syncwrites
+                    && self.f_asyncwrites == other.f_asyncwrites
+                    && self.f_syncreads == other.f_syncreads
+                    && self.f_asyncreads == other.f_asyncreads
+                    && self.f_namemax == other.f_namemax
+                    && self.f_owner == other.f_owner
+                    && self.f_fsid == other.f_fsid
+                    && self.f_fstypename == other.f_fstypename
+                    && self
+                    .f_mntfromname
+                    .iter()
+                    .zip(other.f_mntfromname.iter())
+                    .all(|(a,b)| a == b)
+                    && self
+                    .f_mntonname
+                    .iter()
+                    .zip(other.f_mntonname.iter())
+                    .all(|(a,b)| a == b)
+            }
+        }
+        impl Eq for statfs {}
+        impl ::fmt::Debug for statfs {
+            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+                f.debug_struct("statfs")
+                    .field("f_bsize", &self.f_bsize)
+                    .field("f_iosize", &self.f_iosize)
+                    .field("f_blocks", &self.f_blocks)
+                    .field("f_bfree", &self.f_bfree)
+                    .field("f_bavail", &self.f_bavail)
+                    .field("f_files", &self.f_files)
+                    .field("f_ffree", &self.f_ffree)
+                    .field("f_syncwrites", &self.f_syncwrites)
+                    .field("f_asyncwrites", &self.f_asyncwrites)
+                    .field("f_syncreads", &self.f_syncreads)
+                    .field("f_asyncreads", &self.f_asyncreads)
+                    .field("f_namemax", &self.f_namemax)
+                    .field("f_owner", &self.f_owner)
+                    .field("f_fsid", &self.f_fsid)
+                    .field("f_fstypename", &self.f_fstypename)
+                    .field("f_mntfromname", &&self.f_mntfromname[..])
+                    .field("f_mntonname", &&self.f_mntonname[..])
+                    .finish()
+            }
+        }
+        impl ::hash::Hash for statfs {
+            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
+                self.f_version.hash(state);
+                self.f_type.hash(state);
+                self.f_flags.hash(state);
+                self.f_bsize.hash(state);
+                self.f_iosize.hash(state);
+                self.f_blocks.hash(state);
+                self.f_bfree.hash(state);
+                self.f_bavail.hash(state);
+                self.f_files.hash(state);
+                self.f_ffree.hash(state);
+                self.f_syncwrites.hash(state);
+                self.f_asyncwrites.hash(state);
+                self.f_syncreads.hash(state);
+                self.f_asyncreads.hash(state);
+                self.f_namemax.hash(state);
+                self.f_owner.hash(state);
+                self.f_fsid.hash(state);
+                self.f_fstypename.hash(state);
+                self.f_mntfromname.hash(state);
+                self.f_mntonname.hash(state);
+            }
+        }
+
+        impl PartialEq for dirent {
+            fn eq(&self, other: &dirent) -> bool {
+                self.d_fileno == other.d_fileno
+                    && self.d_reclen == other.d_reclen
+                    && self.d_type == other.d_type
+                    && self.d_namlen == other.d_namlen
+                    && self
+                    .d_name[..self.d_namlen as _]
+                    .iter()
+                    .zip(other.d_name.iter())
+                    .all(|(a,b)| a == b)
+            }
+        }
+        impl Eq for dirent {}
+        impl ::fmt::Debug for dirent {
+            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+                f.debug_struct("dirent")
+                    .field("d_fileno", &self.d_fileno)
+                    .field("d_reclen", &self.d_reclen)
+                    .field("d_type", &self.d_type)
+                    .field("d_namlen", &self.d_namlen)
+                    .field("d_name", &&self.d_name[..self.d_namlen as _])
+                    .finish()
+            }
+        }
+        impl ::hash::Hash for dirent {
+            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
+                self.d_fileno.hash(state);
+                self.d_reclen.hash(state);
+                self.d_type.hash(state);
+                self.d_namlen.hash(state);
+                self.d_name[..self.d_namlen as _].hash(state);
             }
         }
     }
@@ -3880,13 +4052,7 @@ pub const COMMLEN: usize = 19;
 pub const KI_EMULNAMELEN: usize = 16;
 /// number of groups in ki_groups
 pub const KI_NGROUPS: usize = 16;
-cfg_if! {
-    if #[cfg(freebsd11)] {
-        pub const KI_NSPARE_INT: usize = 4;
-    } else {
-        pub const KI_NSPARE_INT: usize = 2;
-    }
-}
+pub const KI_NSPARE_INT: usize = 2;
 pub const KI_NSPARE_LONG: usize = 12;
 /// Flags for the process credential.
 pub const KI_CRF_CAPABILITY_MODE: usize = 0x00000001;
@@ -4062,7 +4228,7 @@ pub const NZERO: ::c_int = 0;
 pub const RUSAGE_THREAD: ::c_int = 1;
 
 cfg_if! {
-    if #[cfg(any(freebsd11, target_pointer_width = "32"))] {
+    if #[cfg(target_pointer_width = "32")] {
         pub const ARG_MAX: ::c_int = 256 * 1024;
     } else {
         pub const ARG_MAX: ::c_int = 2 * 256 * 1024;
@@ -4357,15 +4523,8 @@ pub const PS_FST_FFLAG_HASLOCK: ::c_int = 0x4000;
 pub const MAXFIDSZ: ::c_int = 16;
 /// Length of type name including null.
 pub const MFSNAMELEN: ::c_int = 16;
-cfg_if! {
-    if #[cfg(any(freebsd10, freebsd11))] {
-        /// Size of on/from name bufs.
-        pub const MNAMELEN: ::c_int = 88;
-    } else {
-        /// Size of on/from name bufs.
-        pub const MNAMELEN: ::c_int = 1024;
-    }
-}
+/// Size of on/from name bufs.
+pub const MNAMELEN: ::c_int = 1024;
 
 /// Using journaled soft updates.
 pub const MNT_SUJ: u64 = 0x100000000;
@@ -4861,26 +5020,6 @@ safe_f! {
     }
 }
 
-cfg_if! {
-    if #[cfg(not(any(freebsd10, freebsd11)))] {
-        extern "C" {
-            pub fn fhlink(fhp: *mut fhandle_t, to: *const ::c_char) -> ::c_int;
-            pub fn fhlinkat(fhp: *mut fhandle_t, tofd: ::c_int, to: *const ::c_char) -> ::c_int;
-            pub fn fhreadlink(
-                fhp: *mut fhandle_t,
-                buf: *mut ::c_char,
-                bufsize: ::size_t,
-            ) -> ::c_int;
-            pub fn getfhat(
-                fd: ::c_int,
-                path: *mut ::c_char,
-                fhp: *mut fhandle,
-                flag: ::c_int,
-            ) -> ::c_int;
-        }
-    }
-}
-
 extern "C" {
     #[cfg_attr(doc, doc(alias = "__errno_location"))]
     #[cfg_attr(doc, doc(alias = "errno"))]
@@ -5174,9 +5313,7 @@ extern "C" {
     pub fn pthread_spin_trylock(lock: *mut pthread_spinlock_t) -> ::c_int;
     pub fn pthread_spin_unlock(lock: *mut pthread_spinlock_t) -> ::c_int;
 
-    #[cfg_attr(all(target_os = "freebsd", freebsd11), link_name = "statfs@FBSD_1.0")]
     pub fn statfs(path: *const ::c_char, buf: *mut statfs) -> ::c_int;
-    #[cfg_attr(all(target_os = "freebsd", freebsd11), link_name = "fstatfs@FBSD_1.0")]
     pub fn fstatfs(fd: ::c_int, buf: *mut statfs) -> ::c_int;
 
     pub fn dup3(src: ::c_int, dst: ::c_int, flags: ::c_int) -> ::c_int;
@@ -5208,10 +5345,6 @@ extern "C" {
     pub fn getfh(path: *const ::c_char, fhp: *mut fhandle_t) -> ::c_int;
     pub fn lgetfh(path: *const ::c_char, fhp: *mut fhandle_t) -> ::c_int;
     pub fn getfsstat(buf: *mut ::statfs, bufsize: ::c_long, mode: ::c_int) -> ::c_int;
-    #[cfg_attr(
-        all(target_os = "freebsd", freebsd11),
-        link_name = "getmntinfo@FBSD_1.0"
-    )]
     pub fn getmntinfo(mntbufp: *mut *mut ::statfs, mode: ::c_int) -> ::c_int;
     pub fn mount(
         type_: *const ::c_char,
@@ -5406,6 +5539,18 @@ extern "C" {
         infotype: *mut ::c_uint,
         flags: *mut ::c_int,
     ) -> ::ssize_t;
+    pub fn setgrent();
+    pub fn mprotect(addr: *mut ::c_void, len: ::size_t, prot: ::c_int) -> ::c_int;
+    pub fn freelocale(loc: ::locale_t);
+    pub fn msgrcv(
+        msqid: ::c_int,
+        msgp: *mut ::c_void,
+        msgsz: ::size_t,
+        msgtyp: ::c_long,
+        msgflg: ::c_int,
+    ) -> ::ssize_t;
+    pub fn dirname(path: *mut ::c_char) -> *mut ::c_char;
+    pub fn basename(path: *mut ::c_char) -> *mut ::c_char;
 }
 
 #[link(name = "memstat")]
@@ -5656,9 +5801,6 @@ cfg_if! {
     } else if #[cfg(freebsd12)] {
         mod freebsd12;
         pub use self::freebsd12::*;
-    } else if #[cfg(any(freebsd10, freebsd11))] {
-        mod freebsd11;
-        pub use self::freebsd11::*;
     } else {
         // Unknown freebsd version
     }
