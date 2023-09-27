@@ -47,7 +47,7 @@ while read -r target; do
     rustup target add "${target}" || true
 
     # Enable extra configuration flags:
-    export RUSTDOCFLAGS="--cfg freebsd11"
+    export RUSTDOCFLAGS="--cfg freebsd12"
 
     # If cargo doc fails, then try with unstable feature:
     if ! cargo doc --target "${target}" \
