@@ -4,9 +4,8 @@ s_no_extra_traits! {
     pub struct max_align_t {
         priv_: [i64; 4]
     }
-}
 
-s! {
+    #[allow(missing_debug_implementations)]
     pub struct ucontext_t {
         pub uc_flags: ::c_ulong,
         pub uc_link: *mut ucontext_t,
@@ -15,6 +14,7 @@ s! {
         pub uc_mcontext: mcontext_t,
     }
 
+    #[allow(missing_debug_implementations)]
     pub struct pt_regs {
         pub gpr: [::c_ulong; 32],
         pub nip: ::c_ulong,
@@ -31,6 +31,7 @@ s! {
         pub result: ::c_ulong,
     }
 
+    #[allow(missing_debug_implementations)]
     #[repr(align(16))]
     pub struct mcontext_t {
         __glibc_reserved: [::c_ulong; 4],
@@ -45,6 +46,7 @@ s! {
         pub vmx_reserve: [::c_long; 69], // # define __NVRREG	34 (34*2+1)
     }
 
+    #[allow(missing_debug_implementations)]
     #[repr(align(16))]
     pub struct vrregset_t {
         pub vrregs: [[::c_uint; 4]; 32],
@@ -53,6 +55,7 @@ s! {
         __pad: [::c_uint; 3],
     }
 
+    #[allow(missing_debug_implementations)]
     #[repr(align(16))]
     pub struct vscr_t {
         #[cfg(target_endian = "big")]
@@ -65,7 +68,9 @@ s! {
         #[cfg(target_endian = "little")]
         __pad: [::c_uint; 3],
     }
+}
 
+s! {
     #[repr(align(8))]
     pub struct clone_args {
         pub flags: ::c_ulonglong,
