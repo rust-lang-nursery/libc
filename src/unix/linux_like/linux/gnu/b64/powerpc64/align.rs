@@ -56,7 +56,7 @@ s_no_extra_traits! {
     }
 
     #[allow(missing_debug_implementations)]
-    #[repr(align(16))]
+    #[repr(align(4))]
     pub struct vscr_t {
         #[cfg(target_endian = "big")]
         __pad: [::c_uint; 3],
