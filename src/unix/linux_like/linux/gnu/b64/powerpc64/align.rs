@@ -32,7 +32,7 @@ s_no_extra_traits! {
     }
 
     #[allow(missing_debug_implementations)]
-    #[repr(align(16))]
+    #[repr(align(8))]
     pub struct mcontext_t {
         __glibc_reserved: [::c_ulong; 4],
         pub signal: ::c_int,
