@@ -3034,7 +3034,10 @@ fn test_neutrino(target: &str) {
 
     let mut cfg = ctest_cfg();
     if target.ends_with("_iosock") {
-        cfg.include(concat!(env!("QNX_TARGET"), "/usr/include/io-sock"));
+        let qnx_target_val = std::env::var("QNX_TARGET")
+        .unwrap_or_else(|_| "QNX_TARGET_not_set_please_source_qnxsdp".into());
+
+        cfg.include(qnx_target_val + "/usr/include/io-sock");
         headers! { cfg:
             "io-sock.h",
             "sys/types.h",

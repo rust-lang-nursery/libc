@@ -337,8 +337,8 @@ pub const ATF_USETRAILERS: c_int = 0x10;
 
 cfg_if! {
     if #[cfg(target_os = "nto")] {
-        pub const FNM_PERIOD: c_int = 1 << 1;}
-    else {
+        pub const FNM_PERIOD: c_int = 1 << 1;
+    } else {
         pub const FNM_PERIOD: c_int = 1 << 2;
     }
 }
@@ -360,12 +360,22 @@ cfg_if! {
         target_os = "openbsd",
     ))] {
         pub const FNM_PATHNAME: c_int = 1 << 1;
-        pub const FNM_NOESCAPE: c_int = 1 << 0;
     } else {
         pub const FNM_PATHNAME: c_int = 1 << 0;
-        #[cfg(target_os = "nto")]
+    }
+}
+
+cfg_if! {
+    if #[cfg(any(
+        target_os = "macos",
+        target_os = "freebsd",
+        target_os = "android",
+        target_os = "openbsd",
+    ))] {
+        pub const FNM_NOESCAPE: c_int = 1 << 0;
+    } else if #[cfg(target_os = "nto")] {
         pub const FNM_NOESCAPE: c_int = 1 << 2;
-        #[cfg(not(target_os = "nto"))]
+    } else {
         pub const FNM_NOESCAPE: c_int = 1 << 1;
     }
 }
