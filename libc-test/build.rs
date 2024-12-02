@@ -3035,7 +3035,7 @@ fn test_neutrino(target: &str) {
     let mut cfg = ctest_cfg();
     if target.ends_with("_iosock") {
         let qnx_target_val = std::env::var("QNX_TARGET")
-        .unwrap_or_else(|_| "QNX_TARGET_not_set_please_source_qnxsdp".into());
+            .unwrap_or_else(|_| "QNX_TARGET_not_set_please_source_qnxsdp".into());
 
         cfg.include(qnx_target_val + "/usr/include/io-sock");
         headers! { cfg:
@@ -3203,9 +3203,6 @@ fn test_neutrino(target: &str) {
 
             // Does not exist in Neutrino
             "locale_t" => true,
-
-            // `c_char_def` is always public but not always reexported.
-            "c_char_def" => true,
 
             // FIXME: "'__uint128' undeclared" in C
             "__uint128" => true,
