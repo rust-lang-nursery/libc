@@ -24,9 +24,9 @@ mod t {
         let dev = unsafe { makedev_ffi(major, minor) };
         assert_eq!(libc::makedev(major, minor), dev);
         let major = unsafe { major_ffi(dev) };
-        assert_eq!(libc::major(dev), major);
+        assert_eq!(libc::major(dev), major as _);
         let minor = unsafe { minor_ffi(dev) };
-        assert_eq!(libc::minor(dev), minor);
+        assert_eq!(libc::minor(dev), minor as _);
     }
 
     // Every OS should be able to handle 8 bit major and minor numbers
