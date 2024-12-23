@@ -1,6 +1,16 @@
 # Changelog
 
 ## [Unreleased]
+## [0.2.170](https://github.com/rust-lang/libc/compare/0.2.169...0.2.170) - 2024-12-23
+
+### Other
+
+- Define c_char at top-level and remove per-target c_char definitions
+- Allow `unpredictable_function_pointer_comparisons` in another place
+
+### Removed
+
+- Remove `c_char` from the PSP module
 ## [0.2.169](https://github.com/rust-lang/libc/compare/0.2.168...0.2.169) - 2024-12-18
 
 ### Added
