@@ -1462,7 +1462,7 @@ safe_f! {
         let major = major as crate::dev_t;
         let minor = minor as crate::dev_t;
         let mut dev = 0;
-        dev |= (major & 0xfffff000) << 32;
+        dev |= (major & 0xfffff000) << 31 << 1;
         dev |= (major & 0x00000fff) << 8;
         dev |= (minor & 0xffffff00) << 12;
         dev |= minor & 0x000000ff;
