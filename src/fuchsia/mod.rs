@@ -253,11 +253,6 @@ s! {
         pub l_linger: c_int,
     }
 
-    pub struct sigval {
-        // Actually a union of an int and a void*
-        pub sival_ptr: *mut c_void,
-    }
-
     // <sys/time.h>
     pub struct itimerval {
         pub it_interval: crate::timeval,
@@ -424,6 +419,13 @@ s! {
 
     pub struct epoll_event {
         pub events: u32,
+        pub data: epoll_data,
+    }
+
+    pub union epoll_data {
+        pub ptr: *mut c_void,
+        pub fd: c_int,
+        pub u32: u32,
         pub u64: u64,
     }
 
@@ -478,7 +480,7 @@ s! {
         pub ifa_flags: c_uint,
         pub ifa_addr: *mut crate::sockaddr,
         pub ifa_netmask: *mut crate::sockaddr,
-        pub ifa_ifu: *mut crate::sockaddr, // FIXME This should be a union
+        pub ifa_ifu: __c_anonymous_ifa_ifu,
         pub ifa_data: *mut c_void,
     }
 
@@ -1054,6 +1056,16 @@ s_no_extra_traits! {
     pub struct pthread_cond_t {
         size: [u8; crate::__SIZEOF_PTHREAD_COND_T],
     }
+
+    pub union sigval {
+        pub sival_int: c_int,
+        pub sival_ptr: *mut c_void,
+    }
+
+    pub union __c_anonymous_ifa_ifu {
+        ifu_broadaddr: *mut sockaddr,
+        ifu_dstaddr: *mut sockaddr,
+    }
 }
 
 cfg_if! {
@@ -1360,17 +1372,6 @@ cfg_if! {
             }
         }
         impl Eq for sigevent {}
-        impl fmt::Debug for sigevent {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("sigevent")
-                    .field("sigev_value", &self.sigev_value)
-                    .field("sigev_signo", &self.sigev_signo)
-                    .field("sigev_notify", &self.sigev_notify)
-                    .field("sigev_notify_function", &self.sigev_notify_function)
-                    .field("sigev_notify_attributes", &self.sigev_notify_attributes)
-                    .finish()
-            }
-        }
         impl hash::Hash for sigevent {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.sigev_value.hash(state);
@@ -1425,16 +1426,33 @@ cfg_if! {
             }
         }
         impl Eq for pthread_rwlock_t {}
-        impl fmt::Debug for pthread_rwlock_t {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.debug_struct("pthread_rwlock_t")
-                    // FIXME: .field("size", &self.size)
-                    .finish()
-            }
-        }
         impl hash::Hash for pthread_rwlock_t {
             fn hash<H: hash::Hasher>(&self, state: &mut H) {
                 self.size.hash(state);
+            }
+        }
+
+        impl PartialEq for sigval {
+            fn eq(&self, other: &sigval) -> bool {
+                unimplemented!("traits")
+            }
+        }
+        impl Eq for sigval {}
+        impl hash::Hash for sigval {
+            fn hash<H: hash::Hasher>(&self, state: &mut H) {
+                unimplemented!("traits")
+            }
+        }
+
+        impl PartialEq for __c_anonymous_ifa_ifu {
+            fn eq(&self, other: &__c_anonymous_ifa_ifu) -> bool {
+                unimplemented!("traits")
+            }
+        }
+        impl Eq for __c_anonymous_ifa_ifu {}
+        impl hash::Hash for __c_anonymous_ifa_ifu {
+            fn hash<H: hash::Hasher>(&self, state: &mut H) {
+                unimplemented!("traits")
             }
         }
     }

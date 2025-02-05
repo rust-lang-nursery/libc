@@ -501,6 +501,22 @@ s! {
 }
 
 s_no_extra_traits! {
+    #[cfg_attr(any(
+        target_arch = "x86", target_arch = "x86_64"),
+        repr(packed(4))
+    )]
+    pub struct epoll_event {
+        pub events: u32,
+        pub data: epoll_data,
+    }
+
+    pub union epoll_data {
+        pub ptr: *mut c_void,
+        pub fd: c_int,
+        pub u32: u32,
+        pub u64: u64,
+    }
+
     pub struct sockaddr_un {
         pub sun_family: sa_family_t,
         pub sun_path: [c_char; 108],
@@ -573,6 +589,30 @@ s_no_extra_traits! {
 
 cfg_if! {
     if #[cfg(feature = "extra_traits")] {
+        impl PartialEq for epoll_event {
+            fn eq(&self, other: &epoll_event) -> bool {
+                unimplemented!("traits")
+            }
+        }
+        impl Eq for epoll_event {}
+        impl hash::Hash for epoll_event {
+            fn hash<H: hash::Hasher>(&self, state: &mut H) {
+                unimplemented!("traits")
+            }
+        }
+
+        impl PartialEq for epoll_data {
+            fn eq(&self, other: &epoll_data) -> bool {
+                unimplemented!("traits")
+            }
+        }
+        impl Eq for epoll_data {}
+        impl hash::Hash for epoll_data {
+            fn hash<H: hash::Hasher>(&self, state: &mut H) {
+                unimplemented!("traits")
+            }
+        }
+
         impl PartialEq for sockaddr_un {
             fn eq(&self, other: &sockaddr_un) -> bool {
                 self.sun_family == other.sun_family
