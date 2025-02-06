@@ -76,7 +76,7 @@ pub type sctp_assoc_t = __s32;
 pub type eventfd_t = u64;
 missing! {
     #[cfg_attr(feature = "extra_traits", derive(Debug))]
-    pub enum fpos64_t {} // FIXME: fill this out with a struct
+    pub enum fpos64_t {} // FIXME(linux): fill this out with a struct
 }
 
 e! {
@@ -326,7 +326,21 @@ s! {
     }
 
     pub struct input_event {
+        // FIXME(1.0): Change to the commented variant, see https://github.com/rust-lang/libc/pull/4148#discussion_r1857511742
+        #[cfg(any(target_pointer_width = "64", not(linux_time_bits64)))]
         pub time: crate::timeval,
+        // #[cfg(any(target_pointer_width = "64", not(linux_time_bits64)))]
+        // pub input_event_sec: time_t,
+        // #[cfg(any(target_pointer_width = "64", not(linux_time_bits64)))]
+        // pub input_event_usec: suseconds_t,
+        // #[cfg(target_arch = "sparc64")]
+        // _pad1: c_int,
+        #[cfg(all(target_pointer_width = "32", linux_time_bits64))]
+        pub input_event_sec: c_ulong,
+
+        #[cfg(all(target_pointer_width = "32", linux_time_bits64))]
+        pub input_event_usec: c_ulong,
+
         pub type_: __u16,
         pub code: __u16,
         pub value: __s32,
@@ -1822,7 +1836,7 @@ cfg_if! {
                     .field("d_off", &self.d_off)
                     .field("d_reclen", &self.d_reclen)
                     .field("d_type", &self.d_type)
-                    // FIXME: .field("d_name", &self.d_name)
+                    // FIXME(debug): .field("d_name", &self.d_name)
                     .finish()
             }
         }
@@ -1860,7 +1874,7 @@ cfg_if! {
                     .field("d_off", &self.d_off)
                     .field("d_reclen", &self.d_reclen)
                     .field("d_type", &self.d_type)
-                    // FIXME: .field("d_name", &self.d_name)
+                    // FIXME(debug): .field("d_name", &self.d_name)
                     .finish()
             }
         }
@@ -1886,7 +1900,7 @@ cfg_if! {
         impl fmt::Debug for pthread_cond_t {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 f.debug_struct("pthread_cond_t")
-                    // FIXME: .field("size", &self.size)
+                    // FIXME(debug): .field("size", &self.size)
                     .finish()
             }
         }
@@ -1908,7 +1922,7 @@ cfg_if! {
         impl fmt::Debug for pthread_mutex_t {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 f.debug_struct("pthread_mutex_t")
-                    // FIXME: .field("size", &self.size)
+                    // FIXME(debug): .field("size", &self.size)
                     .finish()
             }
         }
@@ -1930,7 +1944,7 @@ cfg_if! {
         impl fmt::Debug for pthread_rwlock_t {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 f.debug_struct("pthread_rwlock_t")
-                    // FIXME: .field("size", &self.size)
+                    // FIXME(debug): .field("size", &self.size)
                     .finish()
             }
         }
@@ -2196,18 +2210,6 @@ cfg_if! {
                     .field("u", &self.u)
                     .finish()
             }
-        }
-    }
-}
-
-cfg_if! {
-    if #[cfg(all(
-        any(target_env = "gnu", target_env = "musl", target_env = "ohos"),
-        any(target_arch = "x86_64", target_arch = "x86")
-    ))] {
-        extern "C" {
-            pub fn iopl(level: c_int) -> c_int;
-            pub fn ioperm(from: c_ulong, num: c_ulong, turn_on: c_int) -> c_int;
         }
     }
 }
@@ -5293,6 +5295,7 @@ pub const CANFD_MAX_DLEN: usize = 64;
 
 pub const CANFD_BRS: c_int = 0x01;
 pub const CANFD_ESI: c_int = 0x02;
+pub const CANFD_FDF: c_int = 0x04;
 
 pub const CANXL_MIN_DLC: c_int = 0;
 pub const CANXL_MAX_DLC: c_int = 2047;
@@ -5795,6 +5798,10 @@ pub const EPIOCGPARAMS: Ioctl = 0x80088a02;
 const _IOC_NRBITS: u32 = 8;
 const _IOC_TYPEBITS: u32 = 8;
 
+// siginfo.h
+pub const SI_DETHREAD: c_int = -7;
+pub const TRAP_PERF: c_int = 6;
+
 // https://github.com/search?q=repo%3Atorvalds%2Flinux+%22%23define+_IOC_NONE%22&type=code
 cfg_if! {
     if #[cfg(any(
@@ -6070,6 +6077,18 @@ safe_f! {
 
     pub {const} fn SCTP_PR_PRIO_ENABLED(policy: c_int) -> bool {
         policy == SCTP_PR_SCTP_PRIO
+    }
+}
+
+cfg_if! {
+    if #[cfg(all(
+        any(target_env = "gnu", target_env = "musl", target_env = "ohos"),
+        any(target_arch = "x86_64", target_arch = "x86")
+    ))] {
+        extern "C" {
+            pub fn iopl(level: c_int) -> c_int;
+            pub fn ioperm(from: c_ulong, num: c_ulong, turn_on: c_int) -> c_int;
+        }
     }
 }
 
@@ -6414,8 +6433,6 @@ extern "C" {
 
     pub fn nl_langinfo(item: crate::nl_item) -> *mut c_char;
 
-    pub fn getdomainname(name: *mut c_char, len: size_t) -> c_int;
-    pub fn setdomainname(name: *const c_char, len: size_t) -> c_int;
     pub fn vhangup() -> c_int;
     pub fn sync();
     pub fn syncfs(fd: c_int) -> c_int;

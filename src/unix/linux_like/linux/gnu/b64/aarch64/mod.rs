@@ -3,7 +3,6 @@
 use crate::prelude::*;
 use crate::{off64_t, off_t};
 
-pub type c_char = u8;
 pub type wchar_t = u32;
 pub type nlink_t = u32;
 pub type blksize_t = i32;
@@ -602,7 +601,7 @@ pub const HWCAP_SSBS: c_ulong = 1 << 28;
 pub const HWCAP_SB: c_ulong = 1 << 29;
 pub const HWCAP_PACA: c_ulong = 1 << 30;
 pub const HWCAP_PACG: c_ulong = 1 << 31;
-// FIXME: enable these again once linux-api-headers are up to date enough on CI.
+// FIXME(linux): enable these again once linux-api-headers are up to date enough on CI.
 // See discussion in https://github.com/rust-lang/libc/pull/1638
 //pub const HWCAP2_DCPODP: c_ulong = 1 << 0;
 //pub const HWCAP2_SVE2: c_ulong = 1 << 1;

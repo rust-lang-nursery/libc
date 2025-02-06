@@ -12,7 +12,7 @@
     redundant_semicolons,
     unused_macros,
     unused_macro_rules,
-    // FIXME: temporarily allow dead_code to fix CI:
+    // FIXME(1.0): temporarily allow dead_code to fix CI:
     // - https://github.com/rust-lang/libc/issues/3740
     // - https://github.com/rust-lang/rust/pull/126456
     dead_code,
@@ -37,6 +37,38 @@ cfg_if! {
 }
 
 pub use core::ffi::c_void;
+
+cfg_if! {
+    // This configuration comes from `rust-lang/rust` in `library/core/src/ffi/mod.rs`.
+    if #[cfg(all(
+        not(windows),
+        // FIXME(ctest): just use `target_vendor` = "apple"` once `ctest` supports it
+        not(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "tvos",
+            target_os = "watchos",
+            target_os = "visionos",
+        )),
+        any(
+            target_arch = "aarch64",
+            target_arch = "arm",
+            target_arch = "csky",
+            target_arch = "hexagon",
+            target_arch = "msp430",
+            target_arch = "powerpc",
+            target_arch = "powerpc64",
+            target_arch = "riscv64",
+            target_arch = "riscv32",
+            target_arch = "s390x",
+            target_arch = "xtensa",
+        )
+    ))] {
+        pub type c_char = u8;
+    } else {
+        pub type c_char = i8;
+    }
+}
 
 cfg_if! {
     if #[cfg(windows)] {

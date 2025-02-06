@@ -690,7 +690,7 @@ cfg_if! {
                     .field("d_off", &self.d_off)
                     .field("d_reclen", &self.d_reclen)
                     .field("d_type", &self.d_type)
-                    // FIXME: .field("d_name", &self.d_name)
+                    // FIXME(debug): .field("d_name", &self.d_name)
                     .finish()
             }
         }
@@ -728,7 +728,7 @@ cfg_if! {
                     .field("d_off", &self.d_off)
                     .field("d_reclen", &self.d_reclen)
                     .field("d_type", &self.d_type)
-                    // FIXME: .field("d_name", &self.d_name)
+                    // FIXME(debug): .field("d_name", &self.d_name)
                     .finish()
             }
         }
@@ -800,7 +800,7 @@ cfg_if! {
                 f.debug_struct("lastlog")
                     .field("ll_time", &self.ll_time)
                     .field("ll_line", &self.ll_line)
-                    // FIXME: .field("ll_host", &self.ll_host)
+                    // FIXME(debug): .field("ll_host", &self.ll_host)
                     .finish()
             }
         }
@@ -851,7 +851,7 @@ cfg_if! {
                     .field("ut_line", &self.ut_line)
                     .field("ut_id", &self.ut_id)
                     .field("ut_user", &self.ut_user)
-                    // FIXME: .field("ut_host", &self.ut_host)
+                    // FIXME(debug): .field("ut_host", &self.ut_host)
                     .field("ut_exit", &self.ut_exit)
                     .field("ut_session", &self.ut_session)
                     .field("ut_tv", &self.ut_tv)
@@ -3525,6 +3525,10 @@ pub const AT_RSEQ_FEATURE_SIZE: c_ulong = 27;
 pub const AT_RSEQ_ALIGN: c_ulong = 28;
 pub const AT_EXECFN: c_ulong = 31;
 pub const AT_MINSIGSTKSZ: c_ulong = 51;
+
+// siginfo.h
+pub const SI_DETHREAD: c_int = -7;
+pub const TRAP_PERF: c_int = 6;
 
 // Most `*_SUPER_MAGIC` constants are defined at the `linux_like` level; the
 // following are only available on newer Linux versions than the versions

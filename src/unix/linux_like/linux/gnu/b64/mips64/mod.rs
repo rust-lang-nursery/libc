@@ -2,7 +2,6 @@ use crate::prelude::*;
 use crate::{off64_t, off_t, pthread_mutex_t};
 
 pub type blksize_t = i64;
-pub type c_char = i8;
 pub type c_long = i64;
 pub type c_ulong = u64;
 pub type nlink_t = u64;
@@ -412,10 +411,13 @@ pub const SYS_swapoff: c_long = 5000 + 163;
 pub const SYS_reboot: c_long = 5000 + 164;
 pub const SYS_sethostname: c_long = 5000 + 165;
 pub const SYS_setdomainname: c_long = 5000 + 166;
+#[deprecated(since = "0.2.70", note = "Functional up to 2.6 kernel")]
 pub const SYS_create_module: c_long = 5000 + 167;
 pub const SYS_init_module: c_long = 5000 + 168;
 pub const SYS_delete_module: c_long = 5000 + 169;
+#[deprecated(since = "0.2.70", note = "Functional up to 2.6 kernel")]
 pub const SYS_get_kernel_syms: c_long = 5000 + 170;
+#[deprecated(since = "0.2.70", note = "Functional up to 2.6 kernel")]
 pub const SYS_query_module: c_long = 5000 + 171;
 pub const SYS_quotactl: c_long = 5000 + 172;
 pub const SYS_nfsservctl: c_long = 5000 + 173;

@@ -2,7 +2,6 @@ use crate::prelude::*;
 use crate::{cmsghdr, off_t};
 
 pub type dev_t = u32;
-pub type c_char = i8;
 pub type wchar_t = i32;
 pub type clock_t = u64;
 pub type ino_t = u64;
@@ -865,6 +864,8 @@ cfg_if! {
                 self.mc_fpregs.hash(state);
             }
         }
+        // FIXME(msrv): suggested method was added in 1.85
+        #[allow(unpredictable_function_pointer_comparisons)]
         impl PartialEq for ucontext_t {
             fn eq(&self, other: &ucontext_t) -> bool {
                 self.uc_sigmask == other.uc_sigmask

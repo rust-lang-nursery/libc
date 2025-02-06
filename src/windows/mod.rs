@@ -22,7 +22,6 @@ pub type uintptr_t = usize;
 pub type ssize_t = isize;
 pub type sighandler_t = usize;
 
-pub type c_char = i8;
 pub type c_long = i32;
 pub type c_ulong = u32;
 pub type wchar_t = u16;
@@ -265,7 +264,7 @@ impl Clone for FILE {
     }
 }
 #[cfg_attr(feature = "extra_traits", derive(Debug))]
-pub enum fpos_t {} // FIXME: fill this out with a struct
+pub enum fpos_t {} // FIXME(windows): fill this out with a struct
 impl Copy for fpos_t {}
 impl Clone for fpos_t {
     fn clone(&self) -> fpos_t {
